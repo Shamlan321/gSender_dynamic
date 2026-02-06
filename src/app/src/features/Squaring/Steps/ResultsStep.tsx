@@ -24,6 +24,7 @@ import { toast } from 'app/lib/toaster';
 import { METRIC_UNITS } from 'app/constants';
 import store from 'app/store';
 import { useWorkspaceState } from 'app/hooks/useWorkspaceState';
+import { formatEEPROMCommand } from 'app/lib/firmware/commands';
 
 const FM_LOWER_OFFSET_THRESHOLD =
     store.get('workspace.units', METRIC_UNITS) === METRIC_UNITS ? 2 : 0.079;
@@ -56,7 +57,11 @@ const ResultsStep = () => {
             const $100 = eepromAdjustment.x.amount.toFixed(3);
             const $101 = eepromAdjustment.y.amount.toFixed(3);
 
-            controller.command('gcode', [`$100=${$100}`, `$101=${$101}`, '$$']);
+            controller.command('gcode', [
+                formatEEPROMCommand('$100', $100),
+                formatEEPROMCommand('$101', $101),
+                '$$',
+            ]);
 
             toast.info('Updated EEPROM values', { position: 'bottom-right' });
         } catch (error) {

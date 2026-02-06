@@ -35,6 +35,7 @@ import { FaClipboard, FaClipboardCheck, FaClipboardList } from 'react-icons/fa';
 import { GRBL_ACTIVE_STATE_IDLE, GRBL_ACTIVE_STATE_JOG } from 'app/constants';
 import { useWorkspaceState } from 'app/hooks/useWorkspaceState';
 import { toFixedIfNecessary } from 'app/lib/rounding';
+import { formatEEPROMCommand } from 'app/lib/firmware/commands';
 
 const Steps = () => {
     const [status, setStatus] = useState<'initial' | 'started'>('initial');
@@ -81,7 +82,10 @@ const Steps = () => {
             actualDistanceMoved: measuredDistance,
         });
 
-        controller.command('gcode', [`${eepromKey}=${newStepsPerMM}`, '$$']);
+        controller.command('gcode', [
+            formatEEPROMCommand(eepromKey, newStepsPerMM),
+            '$$',
+        ]);
 
         toast.info('Updated steps-per-mm value', { position: 'bottom-right' });
     };
@@ -95,15 +99,15 @@ const Steps = () => {
     const stepImage =
         currentStep === 0
             ? {
-                  x: xAxisCalibrationImage1,
-                  y: yAxisCalibrationImage1,
-                  z: zAxisCalibrationImage1,
-              }[selectedAxis]
+                x: xAxisCalibrationImage1,
+                y: yAxisCalibrationImage1,
+                z: zAxisCalibrationImage1,
+            }[selectedAxis]
             : {
-                  x: xAxisCalibrationImage2,
-                  y: yAxisCalibrationImage2,
-                  z: zAxisCalibrationImage2,
-              }[selectedAxis];
+                x: xAxisCalibrationImage2,
+                y: yAxisCalibrationImage2,
+                z: zAxisCalibrationImage2,
+            }[selectedAxis];
 
     if (status === 'initial') {
         const starterImage = {
@@ -365,13 +369,12 @@ const Steps = () => {
 
                         <div className="space-y-6">
                             <div
-                                className={`flex items-center gap-4 p-4 rounded-lg transition-colors ${
-                                    currentStep === 0
+                                className={`flex items-center gap-4 p-4 rounded-lg transition-colors ${currentStep === 0
                                         ? 'bg-blue-50 border border-blue-200 bg-opacity-40'
                                         : markLocationCompleted
-                                          ? 'bg-green-50 border border-green-200 bg-opacity-30'
-                                          : 'bg-amber-600 border border-amber-600 bg-opacity-10 border-opacity-10 opacity-50 dark:bg-dark dark:border-gray-700 dark:text-white'
-                                }`}
+                                            ? 'bg-green-50 border border-green-200 bg-opacity-30'
+                                            : 'bg-amber-600 border border-amber-600 bg-opacity-10 border-opacity-10 opacity-50 dark:bg-dark dark:border-gray-700 dark:text-white'
+                                    }`}
                             >
                                 <div className={`min-w-8 min-h-8 text-white`}>
                                     {markLocationCompleted && (
@@ -405,13 +408,12 @@ const Steps = () => {
                             </div>
 
                             <div
-                                className={`flex items-center gap-4 p-4 rounded-lg transition-colors dark:bg-dark dark:border-gray-700 dark:text-white ${
-                                    currentStep === 1
+                                className={`flex items-center gap-4 p-4 rounded-lg transition-colors dark:bg-dark dark:border-gray-700 dark:text-white ${currentStep === 1
                                         ? 'bg-blue-50 border border-blue-200 bg-opacity-40'
                                         : moveAxisCompleted
-                                          ? 'bg-green-50 border border-green-200 bg-opacity-30'
-                                          : 'bg-amber-600 border border-amber-600 bg-opacity-10 border-opacity-10 opacity-50 dark:bg-dark dark:border-amber-700 dark:text-white'
-                                }`}
+                                            ? 'bg-green-50 border border-green-200 bg-opacity-30'
+                                            : 'bg-amber-600 border border-amber-600 bg-opacity-10 border-opacity-10 opacity-50 dark:bg-dark dark:border-amber-700 dark:text-white'
+                                    }`}
                             >
                                 <div className={`min-w-8 min-h-8 text-white`}>
                                     {moveAxisCompleted && (
@@ -468,13 +470,12 @@ const Steps = () => {
                             </div>
 
                             <div
-                                className={`flex items-center gap-4 p-4 rounded-lg transition-colors ${
-                                    currentStep === 2
+                                className={`flex items-center gap-4 p-4 rounded-lg transition-colors ${currentStep === 2
                                         ? 'bg-blue-50 border border-blue-200 bg-opacity-40'
                                         : setTravelCompleted
-                                          ? 'bg-green-50 border border-green-200 bg-opacity-30'
-                                          : 'bg-amber-600 border border-amber-600 bg-opacity-10 border-opacity-10 opacity-50 dark:bg-dark dark:border-gray-700 dark:text-white'
-                                }`}
+                                            ? 'bg-green-50 border border-green-200 bg-opacity-30'
+                                            : 'bg-amber-600 border border-amber-600 bg-opacity-10 border-opacity-10 opacity-50 dark:bg-dark dark:border-gray-700 dark:text-white'
+                                    }`}
                             >
                                 <div className={`min-w-8 min-h-8 text-white`}>
                                     {setTravelCompleted && (

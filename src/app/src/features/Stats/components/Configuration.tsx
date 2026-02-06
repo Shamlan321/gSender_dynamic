@@ -66,8 +66,8 @@ export function Configuration() {
     return (
         <div className="flex flex-col gap-1">
             <div className="font-bold mb-2 dark:text-white">
-                {machineProfile.company + ' ' + machineProfile.name + ' '}
-                <span className="font-normal">{machineProfile.type}</span>
+                {(typeof machineProfile.company === 'object' ? (machineProfile.company as any)?.name : (machineProfile.company || '')) + ' ' + (typeof machineProfile.name === 'object' ? (machineProfile.name as any)?.name : (machineProfile.name || '')) + ' '}
+                <span className="font-normal">{typeof machineProfile.type === 'object' ? (machineProfile.type as any)?.name : machineProfile.type}</span>
             </div>
             <ConfigRow connected={connected} label={'Connection'}>
                 {looksLikeIP ? (

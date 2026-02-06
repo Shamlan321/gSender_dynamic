@@ -1,4 +1,3 @@
-import { Diagnostic } from 'app/features/Stats/components/Diagnostic.tsx';
 import { StatCard } from 'app/features/Stats/components/StatCard';
 import { AlarmListing } from 'app/features/Stats/components/AlarmListing.tsx';
 import { CardHeader } from 'app/features/Stats/components/CardHeader.tsx';
@@ -34,10 +33,7 @@ export function Alarms() {
                 </StatCard>
             </div>
             <div className="col-span-2 row-span-6 col-start-5 px-8 flex flex-col max-xl:flex-row max-xl:col-span-6 max-xl:-order-1 gap-4">
-                <StatCard>
-                    <CardHeader>Diagnostic File</CardHeader>
-                    <Diagnostic />
-                </StatCard>
+
                 <StatCard>
                     <CardHeader>Clear Alarms & Errors</CardHeader>
                     <div className="flex flex-col gap-4 justify-center">

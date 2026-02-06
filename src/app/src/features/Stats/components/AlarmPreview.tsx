@@ -32,9 +32,10 @@ export function AlarmPreview() {
                         key={index}
                     >
                         <span className="font-2xl">
-                            {event.type} {event.CODE}
+                            {typeof event.type === 'object' ? (event.type as any)?.name || JSON.stringify(event.type) : event.type}{' '}
+                            {typeof event.CODE === 'object' ? (event.CODE as any)?.name || JSON.stringify(event.CODE) : event.CODE}
                         </span>
-                        <span>on {event.time}</span>
+                        <span>on {typeof event.time === 'object' ? (event.time as any)?.name || JSON.stringify(event.time) : event.time}</span>
                     </div>
                 ))}
             </div>

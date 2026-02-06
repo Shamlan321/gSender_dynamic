@@ -146,10 +146,10 @@ export function MaintenanceList() {
                         }}
                     >
                         <strong style={{ fontSize: '16px' }}>
-                            {info.cell.row.original.part}
+                            {typeof info.cell.row.original.part === 'object' ? (info.cell.row.original.part as any)?.name || JSON.stringify(info.cell.row.original.part) : info.cell.row.original.part}
                         </strong>
                         <span>{'\n'}</span>
-                        <span>{info.cell.row.original.description}</span>
+                        <span>{typeof info.cell.row.original.description === 'object' ? (info.cell.row.original.description as any)?.name || JSON.stringify(info.cell.row.original.description) : info.cell.row.original.description}</span>
                     </div>
                 );
             },

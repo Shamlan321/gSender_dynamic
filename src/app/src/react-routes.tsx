@@ -33,7 +33,6 @@ import Macros from './features/Macros';
 import Probe from './features/Probe';
 import Rotary from './features/Rotary';
 import Spindle from './features/Spindle';
-import About from './features/Stats/About';
 import { BottomNav } from './features/RemoteMode/components/BottomNav';
 import Gamepad from './features/Gamepad';
 import { TopBar } from 'app/workspace/TopBar';
@@ -98,27 +97,6 @@ export const ReactRoutes = () => {
                                         description="Get your CNC accurately aligned to make square cuts"
                                         icon={MdSquareFoot}
                                         link="/tools/squaring"
-                                    />
-
-                                    <ToolCard
-                                        title="Keyboard Shortcuts"
-                                        description="Set up keyboard shortcuts for easy navigation and control"
-                                        icon={FaKeyboard}
-                                        link="/tools/keyboard-shortcuts"
-                                    />
-
-                                    <ToolCard
-                                        title="Gamepad"
-                                        description="Easy hand-held CNC control using pre-made or custom profiles"
-                                        icon={FaGamepad}
-                                        link="/tools/gamepad"
-                                    />
-
-                                    <ToolCard
-                                        title="Old Firmware"
-                                        description="This is depreciated and used to be used for updating firmware"
-                                        icon={FaMicrochip}
-                                        link="/tools/firmware"
                                     />
                                 </div>
                             </div>
@@ -222,7 +200,6 @@ export const ReactRoutes = () => {
                     <Route path="alarms" element={<Alarms />} />
                     <Route path="jobs" element={<Jobs />} />
                     <Route path="maintenance" element={<Maintenance />} />
-                    <Route path="about" element={<About />} />
                 </Route>
             </Route>
             <Route

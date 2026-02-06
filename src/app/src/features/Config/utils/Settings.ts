@@ -7,6 +7,7 @@ import { generateEEPROMSettings } from 'app/features/Config/utils/EEPROM.ts';
 import { toast } from 'sonner';
 import controller from 'app/lib/controller.ts';
 import pubsub from 'pubsub-js';
+import { formatEEPROMCommand } from 'app/lib/firmware/commands';
 
 export function exportFirmwareSettings(settings) {
     const output = JSON.stringify(settings);
@@ -124,8 +125,8 @@ export function updateAllSettings(settings, eeprom) {
     const eepromToChange = generateEEPROMSettings(eeprom);
     const eepromNumber = Object.keys(eepromToChange).length;
     if (eepromNumber > 0) {
-        let changedSettings = Object.keys(eepromToChange).map(
-            (k) => `${k}=${eepromToChange[k]}`,
+        let changedSettings = Object.keys(eepromToChange).map((k) =>
+            formatEEPROMCommand(k, eepromToChange[k]),
         );
         changedSettings.push('$$');
         controller.command('gcode', changedSettings);

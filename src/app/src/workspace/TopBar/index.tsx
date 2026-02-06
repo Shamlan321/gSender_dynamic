@@ -11,9 +11,11 @@ export const TopBar = () => {
             <RemoteMenuFlyout />
             <IconUpdater />
 
-            <Connection />
+            <div className="flex-1">
+                <CenterArea />
+            </div>
 
-            <CenterArea />
+            <Connection />
 
             <StatusIcons />
 

@@ -1,9 +1,4 @@
 import { StatCard } from 'app/features/Stats/components/StatCard';
-import { Diagnostic } from 'app/features/Stats/components/Diagnostic.tsx';
-import { ExternalLink } from 'app/features/Stats/components/ExternalLink.tsx';
-import { FaBookBookmark } from 'react-icons/fa6';
-import { ImBubbles4 } from 'react-icons/im';
-import { FaGithub } from 'react-icons/fa';
 import { AlarmPreview } from 'app/features/Stats/components/AlarmPreview.tsx';
 import { CardHeader } from 'app/features/Stats/components/CardHeader.tsx';
 import { JobPreviewList } from 'app/features/Stats/components/JobPreviewList.tsx';
@@ -64,37 +59,7 @@ export function Stats() {
                     id="secondaryStats"
                     className="col-span-2 max-xl:col-span-6 max-xl:flex-row max-xl:grid max-xl:grid-cols-2 row-span-6 col-start-5 px-8 flex flex-col gap-4"
                 >
-                    <div className="flex flex-col gap-4">
-                        <h1 className="text-3xl font-bold dark:text-white">Get Help</h1>
-                        <StatCard>
-                            <Diagnostic />
-                        </StatCard>
-                        <ExternalLink
-                            title={'Resources'}
-                            link={
-                                'https://resources.sienci.com/view/gs-using-gsender/'
-                            }
-                            icon={<FaBookBookmark />}
-                        >
-                            Learn about starting with gSender and how to use
-                            specific features
-                        </ExternalLink>
-                        <ExternalLink
-                            title={'Community'}
-                            link={'https://forum.sienci.com/c/gsender/14'}
-                            icon={<ImBubbles4 />}
-                        >
-                            Have conversations with our friendly and helpful
-                            community
-                        </ExternalLink>
-                        <ExternalLink
-                            title={'Github'}
-                            link={'https://github.com/Sienci-Labs/gsender'}
-                            icon={<FaGithub />}
-                        >
-                            Submit issues or grab the latest version of gSender
-                        </ExternalLink>
-                    </div>
+
                     <AlarmPreview />
                 </div>
             </div>

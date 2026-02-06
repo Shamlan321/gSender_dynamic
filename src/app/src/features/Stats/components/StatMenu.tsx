@@ -37,7 +37,6 @@ export function StatMenu() {
                 <StatMenuLink label="Jobs" href={'/stats/jobs'} />
                 <StatMenuLink label="Maintenance" href={'/stats/maintenance'} />
                 <StatMenuLink label="Alarms" href={'/stats/alarms'} />
-                <StatMenuLink label="About" href={'/stats/about'} />
             </ul>
         </div>
     );

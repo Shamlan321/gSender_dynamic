@@ -73,7 +73,7 @@ function MaintenanceTask({ task }: { task: Task }) {
                     {time} hrs
                 </span>
                 <span className="text-gray-700 max-xl:text-sm dark:text-gray-400">
-                    {task.name}
+                    {typeof task.name === 'object' ? (task.name as any)?.name || JSON.stringify(task.name) : task.name}
                 </span>
             </div>
             <div className={reminderStyles({ color: reminderString })}>

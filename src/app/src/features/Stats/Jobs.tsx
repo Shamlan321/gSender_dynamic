@@ -33,10 +33,12 @@ const columnData: CustomColumnDef<Job, any>[] = [
     {
         accessorKey: 'file',
         header: () => 'File Name',
-        cell: (info: { renderValue: () => string }) => {
+        cell: (info: { renderValue: () => any }) => {
+            const val = info.renderValue();
+            const displayName = typeof val === 'object' ? (val as any)?.name : val;
             return (
                 <>
-                    <div className="break-all">{info.renderValue()}</div>
+                    <div className="break-all">{displayName}</div>
                 </>
             );
         },
@@ -54,6 +56,10 @@ const columnData: CustomColumnDef<Job, any>[] = [
     {
         accessorKey: 'totalLines',
         header: () => '# Lines',
+        cell: (info: { renderValue: () => any }) => {
+            const val = info.renderValue();
+            return typeof val === 'object' ? (val as any)?.name || JSON.stringify(val) : val;
+        },
         size: 50,
     },
     {

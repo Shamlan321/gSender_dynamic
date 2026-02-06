@@ -25,6 +25,7 @@ import { GRBLHAL } from 'app/constants';
 import { JogInput } from 'app/features/Config/components/SettingInputs/JogInput.tsx';
 import Tooltip from 'app/components/Tooltip';
 import pubsub from 'pubsub-js';
+import { formatEEPROMCommand } from 'app/lib/firmware/commands';
 
 interface SettingRowProps {
     setting: gSenderSetting;
@@ -161,7 +162,10 @@ export function SettingRow({
     };
 
     function handleSingleSettingReset(setting, value) {
-        controller.command('gcode', [`${setting}=${value}`, '$$']);
+        controller.command('gcode', [
+            formatEEPROMCommand(setting, value),
+            '$$',
+        ]);
         toast.success(`Restored ${setting} to default value of ${value}`, {
             position: 'bottom-right',
         });

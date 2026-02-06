@@ -231,6 +231,47 @@ class GrblHalController {
         // Connection
         this.connection = connection;
 
+        // FluidNC Compatibility Patch
+        const fixFluidNC = (data) => {
+            if (typeof data !== 'string') {
+                return data;
+            }
+            let modified = false;
+            // Fix Resolutions
+            if (data.includes('$Grbl/Resolution/X')) {
+                data = data.replace('$Grbl/Resolution/X', '$/axes/x/steps_per_mm');
+                modified = true;
+            }
+            if (data.includes('$Grbl/Resolution/Y')) {
+                data = data.replace('$Grbl/Resolution/Y', '$/axes/y/steps_per_mm');
+                modified = true;
+            }
+            if (data.includes('$Grbl/Resolution/Z')) {
+                data = data.replace('$Grbl/Resolution/Z', '$/axes/z/steps_per_mm');
+                modified = true;
+            }
+            // Suppress MaxSpindleSpeed error
+            if (data.includes('$Grbl/MaxSpindleSpeed')) {
+                data = ';' + data;
+                modified = true;
+            }
+
+            if (modified) {
+                // console.log('!!! FLUIDNC FIX APPLIED:', data.trim());
+            }
+            return data;
+        };
+
+        const originalWriteImmediate = this.connection.writeImmediate.bind(this.connection);
+        this.connection.writeImmediate = (data) => {
+            originalWriteImmediate(fixFluidNC(data));
+        };
+
+        const originalConnectionWrite = this.connection.write.bind(this.connection);
+        this.connection.write = (data, context) => {
+            originalConnectionWrite(fixFluidNC(data), context);
+        };
+
         this.connection.setWriteFilter((data) => {
             const line = data.trim();
 
@@ -1876,7 +1917,7 @@ class GrblHalController {
             // @param {number} value The amount of percentage increase or decrease.
             'spindleOverride': () => {
                 const [value] = args;
-                const [,, spindleOV] = this.state.status.ov;
+                const [, , spindleOV] = this.state.status.ov;
 
                 let diff = value - spindleOV;
                 //Limits for keyboard/gamepad shortcuts

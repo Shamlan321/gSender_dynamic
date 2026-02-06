@@ -1,4 +1,4 @@
-import gSenderIcon from 'app/workspace/TopBar/assets/icon-round.png';
+import dynamicLogo from 'app/workspace/TopBar/assets/dynamic_logo.png';
 import { useState, useEffect } from 'react';
 import { FaDownload } from 'react-icons/fa';
 import cn from 'classnames';
@@ -43,8 +43,8 @@ export function IconUpdater() {
     }, []);
 
     return (
-        <div className="w-[40px] h-[40px] max-sm:hidden relative z-[10000]">
-            <img alt="gSender Logo" src={gSenderIcon} />
+        <div className="w-[300px] h-[80px] max-sm:hidden relative z-[10000] mt-6">
+            <img alt="Dynamic Logo" src={dynamicLogo} className="h-full w-auto object-contain" />
             <UpdateBadge hidden={showUpdater} />
         </div>
     );

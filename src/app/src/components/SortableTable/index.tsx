@@ -177,9 +177,9 @@ const SortableTable = <TData extends { subRow?: string }, TValue>(
             columnVisibility: columnVisibility,
             pagination: pagination
                 ? {
-                      pageSize: pageSize,
-                      pageIndex: 0,
-                  }
+                    pageSize: pageSize,
+                    pageIndex: 0,
+                }
                 : null,
         },
         onSortingChange: setSorting,
@@ -358,7 +358,7 @@ const SortableTable = <TData extends { subRow?: string }, TValue>(
                                                             'break-word',
                                                     }}
                                                 >
-                                                    {row.original.subRow}
+                                                    {typeof row.original.subRow === 'object' ? (row.original.subRow as any)?.name || JSON.stringify(row.original.subRow) : row.original.subRow}
                                                 </td>
                                             </tr>
                                         )}
@@ -386,7 +386,7 @@ const SortableTable = <TData extends { subRow?: string }, TValue>(
                             )}
                             onClick={() => table.setPageIndex(0)}
                             disabled={!table.getCanPreviousPage()}
-                            // display={currentPage > 1 ? 'block' : 'hidden'}
+                        // display={currentPage > 1 ? 'block' : 'hidden'}
                         >
                             {'<<'}
                         </button>
@@ -400,7 +400,7 @@ const SortableTable = <TData extends { subRow?: string }, TValue>(
                             )}
                             onClick={() => table.previousPage()}
                             disabled={!table.getCanPreviousPage()}
-                            // display={currentPage > 1 ? 'block' : 'hidden'}
+                        // display={currentPage > 1 ? 'block' : 'hidden'}
                         >
                             {'<'}
                         </button>
@@ -414,7 +414,7 @@ const SortableTable = <TData extends { subRow?: string }, TValue>(
                             )}
                             onClick={() => table.nextPage()}
                             disabled={!table.getCanNextPage()}
-                            // display={currentPage < maxPages ? 'block' : 'hidden'}
+                        // display={currentPage < maxPages ? 'block' : 'hidden'}
                         >
                             {'>'}
                         </button>
@@ -428,7 +428,7 @@ const SortableTable = <TData extends { subRow?: string }, TValue>(
                             )}
                             onClick={() => table.setPageIndex(maxPages - 1)}
                             disabled={!table.getCanNextPage()}
-                            // display={currentPage < maxPages ? 'block' : 'hidden'}
+                        // display={currentPage < maxPages ? 'block' : 'hidden'}
                         >
                             {'>>'}
                         </button>

@@ -43,16 +43,18 @@ function AlarmItem({ alarm, key }: { alarm: FirmwareEvent; key: string }) {
                     'text-orange-500': !isAlarm,
                 })}
             >
-                {alarm.type} {alarm.CODE} - {alarm.source}
+                {typeof alarm.type === 'object' ? (alarm.type as any)?.name || JSON.stringify(alarm.type) : alarm.type}{' '}
+                {typeof alarm.CODE === 'object' ? (alarm.CODE as any)?.name || JSON.stringify(alarm.CODE) : alarm.CODE} -{' '}
+                {typeof alarm.source === 'object' ? (alarm.source as any)?.name || JSON.stringify(alarm.source) : alarm.source}
             </h3>
             <time className="block mb-2 text-sm font-normal leading-none text-gray-400 dark:text-gray-500">
                 {`at ${hh}:${mi} ${dd}/${mm}/${yyyy}`}
             </time>
             <p className="text-base font-normal text-gray-500 dark:text-gray-300">
-                {alarm.MESSAGE || 'No associated message'}
+                {typeof alarm.MESSAGE === 'object' ? (alarm.MESSAGE as any)?.name || JSON.stringify(alarm.MESSAGE) : (alarm.MESSAGE || 'No associated message')}
             </p>
             <p className="text-base font-normal text-gray-500">
-                Line: <b>{alarm.line}</b>
+                Line: <b>{typeof alarm.line === 'object' ? (alarm.line as any)?.name || JSON.stringify(alarm.line) : alarm.line}</b>
             </p>
         </li>
     );

@@ -119,12 +119,12 @@ const FileInformation: React.FC<Props> = ({ handleRecentFileUpload }) => {
                                                             >
                                                                 <span className="block text-ellipsis text-nowrap overflow-hidden whitespace-nowrap dark:text-white">
                                                                     {
-                                                                        file.fileName
+                                                                        typeof file.fileName === 'object' ? (file.fileName as any)?.name : file.fileName
                                                                     }
                                                                 </span>
                                                             </TooltipTrigger>
                                                             <TooltipContent>
-                                                                {file.fileName}
+                                                                {typeof file.fileName === "object" ? (file.fileName as any)?.name : file.fileName}
                                                             </TooltipContent>
                                                         </Tooltip>
                                                     </TooltipProvider>
@@ -157,13 +157,13 @@ const FileInformation: React.FC<Props> = ({ handleRecentFileUpload }) => {
                                                 <LuFileCode2 className="text-lg" />
                                                 <div className="block text-ellipsis text-nowrap overflow-hidden whitespace-nowrap">
                                                     <span className="font-bold">
-                                                        {lastJob.file}
+                                                        {typeof lastJob.file === 'object' ? (lastJob.file as any)?.name : lastJob.file}
                                                     </span>
                                                 </div>
                                             </div>
                                         </TooltipTrigger>
                                         <TooltipContent>
-                                            {lastJob.file}
+                                            {typeof lastJob.file === "object" ? (lastJob.file as any)?.name : lastJob.file}
                                         </TooltipContent>
                                     </Tooltip>
                                 </TooltipProvider>
@@ -218,14 +218,16 @@ const FileInformation: React.FC<Props> = ({ handleRecentFileUpload }) => {
     const fileSize = formatFileSize(size);
     const ToggleOutput = toggleInfo ? Info : Size;
 
+    const displayName = typeof name === 'object' ? (name as any)?.name : name;
+
     let cutName = '';
     let extension = '';
-    if (name && name.length > 0) {
-        if (name.indexOf('.') > 0) {
-            cutName = name.substring(0, name.indexOf('.') - 3);
-            extension = name.slice(name.indexOf('.') - 3);
+    if (displayName && displayName.length > 0) {
+        if (displayName.indexOf('.') > 0) {
+            cutName = displayName.substring(0, displayName.indexOf('.') - 3);
+            extension = displayName.slice(displayName.indexOf('.') - 3);
         } else {
-            cutName = name;
+            cutName = displayName;
             extension = '';
         }
     }
@@ -244,7 +246,7 @@ const FileInformation: React.FC<Props> = ({ handleRecentFileUpload }) => {
                             </h2>
                         </div>
                     </TooltipTrigger>
-                    <TooltipContent>{name}</TooltipContent>
+                    <TooltipContent>{displayName}</TooltipContent>
                 </Tooltip>
             </TooltipProvider>
 

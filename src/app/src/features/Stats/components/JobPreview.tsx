@@ -15,6 +15,7 @@ const statusBadge = tv({
 });
 
 export function formatDuration(seconds: number) {
+    if (isNaN(seconds)) return '--:--:--';
     return new Date(seconds).toISOString().slice(11, 19);
 }
 
@@ -23,7 +24,7 @@ export function JobPreview({
     jobStatus,
     duration,
 }: {
-    file: string;
+    file: string | { name: string };
     jobStatus: JOB_STATUS_T;
     duration: number;
 }) {
@@ -43,7 +44,9 @@ export function JobPreview({
                     <FaCircleXmark />
                 )}
             </span>
-            <span className="col-span-3 truncate font-bold">{file}</span>
+            <span className="col-span-3 truncate font-bold">
+                {typeof file === 'object' ? (file as any)?.name : file}
+            </span>
             <span className="col-span-2 text-right">
                 {formatDuration(Number(duration))}
             </span>

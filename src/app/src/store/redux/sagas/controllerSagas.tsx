@@ -516,11 +516,11 @@ export function* initialize(): Generator<any, void, any> {
                 const msg =
                     homingEnabled === '1'
                         ? 'The machine connection has been disrupted. To attempt to reconnect to the last active port, ' +
-                          'home, and choose which line to continue from, press Resume.'
+                        'home, and choose which line to continue from, press Resume.'
                         : 'The machine connection has been disrupted. To attempt to reconnect to the last active port, ' +
-                          'press Resume. After that, you can set your Workspace 0 and use the Start From Line function to continue the job. ' +
-                          'Suggested line to start from: ' +
-                          received;
+                        'press Resume. After that, you can set your Workspace 0 and use the Start From Line function to continue the job. ' +
+                        'Suggested line to start from: ' +
+                        received;
 
                 const content = (
                     <div>
@@ -809,6 +809,11 @@ export function* initialize(): Generator<any, void, any> {
             },
             _wasRunning: boolean,
         ) => {
+            // Filter out error code 3 (Invalid statement) - FluidNC compatibility issue
+            if (String(error.code) === '3') {
+                return; // Silently ignore this error in the UI
+            }
+
             // const homingEnabled = _get(
             //     reduxStore.getState(),
             //     'controller.settings.settings.$22',
