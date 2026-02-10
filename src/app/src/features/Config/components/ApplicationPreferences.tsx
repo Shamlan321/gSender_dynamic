@@ -13,7 +13,7 @@ export function ApplicationPreferences() {
     return (
         <fieldset className="flex flex-row gap-x-2 mr-4 mb-1 border rounded border-gray-200 px-4 pb-2 dark:border-gray-700 dark:text-white">
             <legend className="text-slate-600 dark:text-white">
-                gSender Preferences
+                Dynamic Control Panel
             </legend>
             <div className="-mx-4 grid grid-cols-3 divide-x">
                 <ActionButton

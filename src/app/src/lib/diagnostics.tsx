@@ -395,9 +395,9 @@ const unwrapObject = (obj: object, iteration: number): string => {
         .map((key, _i) =>
             typeof obj[key as keyof typeof obj] === 'object'
                 ? tabs +
-                  key +
-                  ': \n' +
-                  unwrapObject(obj[key as keyof typeof obj], iteration + 1)
+                key +
+                ': \n' +
+                unwrapObject(obj[key as keyof typeof obj], iteration + 1)
                 : tabs + key + ': ' + obj[key as keyof typeof obj] + '\n',
         )
         .join('');
@@ -561,7 +561,7 @@ function generateSupportFile() {
             <Page style={styles.body}>
                 <Text style={styles.title}>Diagnostics Report</Text>
                 <Text style={styles.author}>
-                    gSender v{version} • Generated on{' '}
+                    Dynamic CNC Control v{version} • Generated on{' '}
                     {new Date().toLocaleDateString()}
                 </Text>
 
@@ -784,11 +784,11 @@ function generateSupportFile() {
                                 <Text style={styles.text}>
                                     {connection.ports.length > 0
                                         ? connection.ports
-                                              .map(
-                                                  (port, index) =>
-                                                      `${port.port}${index < connection.ports.length - 1 ? ', ' : ''}`,
-                                              )
-                                              .join('')
+                                            .map(
+                                                (port, index) =>
+                                                    `${port.port}${index < connection.ports.length - 1 ? ', ' : ''}`,
+                                            )
+                                            .join('')
                                         : 'None detected'}
                                 </Text>
 
@@ -1207,7 +1207,7 @@ function generateSupportFile() {
                                         Math.round(
                                             (grblInfo.sender.status.sent /
                                                 grblInfo.sender.status.total) *
-                                                100,
+                                            100,
                                         ) === 100
                                             ? styles.statusEnabled
                                             : styles.statusWarning,
@@ -1216,7 +1216,7 @@ function generateSupportFile() {
                                     {Math.round(
                                         (grblInfo.sender.status.sent /
                                             grblInfo.sender.status.total) *
-                                            100,
+                                        100,
                                     )}
                                     % Complete
                                 </Text>
@@ -1232,9 +1232,9 @@ function generateSupportFile() {
                                 <Text style={styles.codeBlockText}>
                                     {gcode
                                         ? gcode.substring(0, 2000) +
-                                          (gcode.length > 2000
-                                              ? '\n\n... (truncated for file size)'
-                                              : '')
+                                        (gcode.length > 2000
+                                            ? '\n\n... (truncated for file size)'
+                                            : '')
                                         : 'No file content available'}
                                 </Text>
                             </View>
@@ -1286,7 +1286,7 @@ function generateSupportFile() {
                 const eepromBlob = new Blob([output], {
                     type: 'application/json',
                 });
-                const eepromFileName = `gSender-firmware-settings-${currentDate}-${currentTime}.json`;
+                const eepromFileName = `Dynamic-CNC-Control-firmware-settings-${currentDate}-${currentTime}.json`;
 
                 // Step 4: Get sender settings
                 setProgress('Exporting application settings...');
@@ -1307,7 +1307,7 @@ function generateSupportFile() {
                 zip.file(diagnosticPDFLabel, blob);
                 zip.file(eepromFileName, eepromBlob);
                 zip.file(
-                    `gSenderSettings_${currentDate}_${currentTime}.json`,
+                    `DynamicCNCControlSettings_${currentDate}_${currentTime}.json`,
                     senderSettings,
                 );
 

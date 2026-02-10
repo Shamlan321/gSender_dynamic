@@ -19,7 +19,8 @@ function stopSpindle() {
 
 function autospinSetup(firmwareType: string = null) {
     if (!firmwareType) {
-        return console.assert('No firmware type detected, failing early');
+        console.error('No firmware type detected, failing early');
+        return;
     }
 
     if (firmwareType === GRBLHAL) {
@@ -76,7 +77,7 @@ function autospinSetup(firmwareType: string = null) {
         Confirm({
             title: 'Restart your Controller',
             content:
-                'Please manually restart your CNC controller (power cycle) and reconnect to gSender for these settings to take effect.',
+                'Please manually restart your CNC controller (power cycle) and reconnect to Dynamic Control Panel for these settings to take effect.',
             confirmLabel: 'OK',
             hideClose: true,
         });

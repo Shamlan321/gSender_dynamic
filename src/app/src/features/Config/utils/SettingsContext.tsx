@@ -79,7 +79,7 @@ const defaultState: iSettingsContext = {
         },
     ],
     settingsFilter: () => true,
-    toggleFilterNonDefault: () => {},
+    toggleFilterNonDefault: () => { },
     filterNonDefault: false,
     eepromIsDefault: (_v) => false,
 };
@@ -193,9 +193,11 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
 
         if (!latest) {
             console.error(
-                'No machine profile with this ID found, using previous value.',
+                'No machine profile with this ID found, defaulting to Generic CNC.',
             );
-            return setMachineProfile(storeMachineProfile);
+            setMachineProfile(machineProfiles[0]);
+            store.set('workspace.machineProfile', machineProfiles[0]);
+            return;
         }
         setMachineProfile(latest);
     }, []);

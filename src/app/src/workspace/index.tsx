@@ -55,7 +55,7 @@ const Workspace = () => {
             }, 100);
         }
 
-        document.title = `gSender ${pkg.version}`;
+        document.title = `Dynamic CNC Control ${pkg.version}`;
     }, [location]);
 
     useDarkMode();

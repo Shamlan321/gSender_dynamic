@@ -59,6 +59,7 @@ import * as WebGL from 'app/lib/three/WebGL';
 
 import _ from 'lodash';
 import store from 'app/store';
+import machineProfiles from 'app/features/Config/assets/MachineDefaults/defaultMachineProfiles.ts';
 
 import { colorsResponse } from 'app/workers/colors.response';
 
@@ -153,7 +154,10 @@ class Visualizer extends Component {
 
     renderCallback = null;
 
-    machineProfile = store.get('workspace.machineProfile');
+    machineProfile =
+        machineProfiles.find(
+            (o) => o.id === (store.get('workspace.machineProfile') || {}).id,
+        ) || machineProfiles[0];
 
     group = new THREE.Group();
 
@@ -437,7 +441,7 @@ class Visualizer extends Component {
         if (
             prevState.units !== state.units ||
             prevState.objects.coordinateSystem.visible !==
-                state.objects.coordinateSystem.visible
+            state.objects.coordinateSystem.visible
         ) {
             const visible = state.objects.coordinateSystem.visible;
 
@@ -466,7 +470,7 @@ class Visualizer extends Component {
         if (
             prevState.units !== state.units ||
             prevState.objects.gridLineNumbers.visible !==
-                state.objects.gridLineNumbers.visible
+            state.objects.gridLineNumbers.visible
         ) {
             const visible = state.objects.gridLineNumbers.visible;
 
@@ -1399,6 +1403,9 @@ class Visualizer extends Component {
     }
 
     createCoordinateSystem(units) {
+        if (!this.machineProfile || !this.machineProfile.mm) {
+            return new THREE.Group();
+        }
         const { mm, in: inches } = this.machineProfile;
 
         const imperialGridCountX = Math.ceil(inches.width);
@@ -1488,6 +1495,9 @@ class Visualizer extends Component {
     }
 
     createGridLineNumbers(units) {
+        if (!this.machineProfile || !this.machineProfile.mm) {
+            return new THREE.Group();
+        }
         const { mm, in: inches } = this.machineProfile;
 
         const imperialGridCountX = Math.ceil(inches.width);
@@ -1692,69 +1702,76 @@ class Visualizer extends Component {
             }
 
             {
-                // Cutting Tool
-                Promise.all([
-                    loadSTL('assets/models/stl/bit.stl').then(
-                        (geometry) => geometry,
-                    ),
-                    loadTexture(
-                        'assets/textures/brushed-steel-texture.jpg',
-                    ).then((texture) => texture),
-                ])
-                    .then((result) => {
-                        const [geometry, texture] = result;
+                // Cutting Tool (Glass Cutting Tip)
+                const geometryC = new THREE.ConeGeometry(1.5, 20, 32);
+                const materialC = new THREE.MeshLambertMaterial({
+                    color: 0xc0c0c0, // Silver/Steel
+                    opacity: 1,
+                    transparent: false,
+                    emissive: 0x222222,
+                });
+                const cone = new THREE.Mesh(geometryC, materialC);
+                // Cone creates from center, so move it up by half height to put base at top
+                // We want tip at 0,0,0.
+                // Cone default points up (Y+). We want it to point down? 
+                // Actually drill bit usually points Z-.
+                // In ThreeJS Cylinder/Cone is Y-aligned by default.
+                // Let's align to Z axis.
+                cone.geometry.rotateX(Math.PI / 2); // Now points along Z axis (base at -Z?, tip at +Z?) -> verified by standard: Cone points Y+. rotateX(90) -> Z+.
+                // We want tip at Z=0, body extending into Z+.
+                // Cone height 20. Center is 0. Tip is at 10. Base at -10.
+                // If we want tip at 0, we translate by -10 Z? 
+                // Let's stick to previous code logic: 
+                // Previous code: geometry.rotateX(-Math.PI / 2); (Points Z-?)
+                // geometry.translate(0, 0, height / 2); (Tip at 0, body +Z)
 
-                        // Rotate the geometry 90 degrees about the X axis.
-                        geometry.rotateX(-Math.PI / 2);
+                // Let's create cone.
+                cone.geometry.rotateX(-Math.PI / 2); // Points towards Z- (if camera looks down Z)
+                cone.position.set(0, 0, 10); // Move up so tip is near 0? 
 
-                        // Scale the geometry data.
-                        geometry.scale(0.5, 0.5, 0.5);
+                // Let's trust my previous LaserPointer logic which seemed to work or at least similar logic.
+                // "geometry.translate(0, 0, height / 2);" from original code suggests tip was at z=0.
 
-                        // Compute the bounding box.
-                        geometry.computeBoundingBox();
+                // Re-creating geometric shape:
+                const shankGeo = new THREE.CylinderGeometry(3, 3, 10, 32);
+                shankGeo.rotateX(-Math.PI / 2);
+                shankGeo.translate(0, 0, 15); // Above the cone
+                const shank = new THREE.Mesh(shankGeo, materialC);
 
-                        // Set the desired position from the origin rather than its center.
-                        const height =
-                            geometry.boundingBox.max.z -
-                            geometry.boundingBox.min.z;
-                        geometry.translate(0, 0, height / 2);
+                const tipGeo = new THREE.ConeGeometry(1.5, 10, 32);
+                tipGeo.rotateX(-Math.PI / 2); // Point down
+                tipGeo.translate(0, 0, 5); // Tip at 0
+                const tip = new THREE.Mesh(tipGeo, materialC);
 
-                        let material = new THREE.MeshLambertMaterial({
-                            map: texture,
-                            opacity: 0.9,
-                            transparent: false,
-                            emissive: 0xcccccc,
-                            emissiveIntensity: 0.5,
-                            color: '#caf0f8',
-                        });
+                // Diamond Tip Point
+                const diamondGeo = new THREE.DodecahedronGeometry(0.5);
+                const diamondMat = new THREE.MeshStandardMaterial({
+                    color: 0xccffff,
+                    emissive: 0x00ffff,
+                    emissiveIntensity: 0.5,
+                    roughness: 0.1,
+                    metalness: 0.9
+                });
+                const diamond = new THREE.Mesh(diamondGeo, diamondMat);
+                diamond.position.set(0, 0, 0);
 
-                        if (geometry.hasColors) {
-                            material.vertexColors = true;
-                        }
+                const object = new THREE.Group();
+                object.add(shank);
+                object.add(tip);
+                object.add(diamond);
 
-                        const mesh = new THREE.Mesh(geometry, material);
-                        const object = new THREE.Object3D();
-                        object.add(mesh);
+                this.cuttingTool = object;
+                this.cuttingTool.name = 'CuttingTool';
+                this.cuttingTool.visible =
+                    isConnected &&
+                    !isLaser &&
+                    (liteMode
+                        ? state.objects.cuttingTool.visibleLite
+                        : state.objects.cuttingTool.visible);
 
-                        this.cuttingTool = object;
-                        this.cuttingTool.name = 'CuttingTool';
-                        this.cuttingTool.visible =
-                            isConnected &&
-                            !isLaser &&
-                            (liteMode
-                                ? state.objects.cuttingTool.visibleLite
-                                : state.objects.cuttingTool.visible);
-
-                        this.group.add(this.cuttingTool);
-                        // Update the scene
-                        this.updateScene();
-                    })
-                    .catch((error) => {
-                        console.error(
-                            'Visualizer: Failed to load cutting tool assets:',
-                            error,
-                        );
-                    });
+                this.group.add(this.cuttingTool);
+                // Update the scene
+                this.updateScene();
             }
 
             {
@@ -2079,9 +2096,12 @@ class Visualizer extends Component {
             return;
         }
 
-        const delta = 1 / fps;
-        const degrees = 360 * ((delta * Math.PI) / 180); // Rotates 360 degrees per second
-        this.cuttingTool.rotateZ(-((rpm / 60) * degrees)); // rotate in clockwise direction
+        // GLASS CUTTER CHANGE: Disable rotation for visualizer since glass cutter does not rotate
+        return;
+
+        // const delta = 1 / fps;
+        // const degrees = 360 * ((delta * Math.PI) / 180); // Rotates 360 degrees per second
+        // this.cuttingTool.rotateZ(-((rpm / 60) * degrees)); // rotate in clockwise direction
     }
 
     // Update cutting tool position

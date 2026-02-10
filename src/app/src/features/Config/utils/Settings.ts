@@ -14,7 +14,7 @@ export function exportFirmwareSettings(settings) {
     const blob = new Blob([output], { type: 'application/json' });
 
     const today = new Date();
-    const filename = `gSender-firmware-settings-${today.toLocaleDateString()}-${today.toLocaleTimeString()}`;
+    const filename = `dynamic-cnc-control-firmware-settings-${today.toLocaleDateString()}-${today.toLocaleTimeString()}`;
 
     download(blob, filename, 'json');
 }
@@ -48,7 +48,7 @@ export async function exportSettings() {
     });
 
     const today = new Date();
-    const filename = `gSender-settings-${today.toLocaleDateString()}-${today.toLocaleTimeString()}`;
+    const filename = `dynamic-cnc-control-settings-${today.toLocaleDateString()}-${today.toLocaleTimeString()}`;
 
     // IE11 & Edge
     if (navigator.msSaveBlob) {
@@ -83,7 +83,7 @@ export function importSettings(e) {
     Confirm({
         title: 'Import Settings',
         content:
-            'All your current settings will be replaced. Are you sure you want to import your settings on gSender?',
+            'All your current settings will be replaced. Are you sure you want to import your settings on Dynamic Control Panel?',
         confirmLabel: 'Import Settings',
         onConfirm: () => onImportConfirm(file),
     });
@@ -93,7 +93,7 @@ export function handleRestoreDefaultClick() {
     Confirm({
         title: 'Restore Settings',
         content:
-            'All your current settings will be removed. Are you sure you want to restore default settings on gSender?',
+            'All your current settings will be removed. Are you sure you want to restore default settings on Dynamic Control Panel?',
         confirmLabel: 'Restore Settings',
         onConfirm: restoreDefault,
     });

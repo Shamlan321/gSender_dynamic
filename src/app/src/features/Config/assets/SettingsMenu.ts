@@ -171,14 +171,14 @@ export const SettingsMenu: SettingsMenuSection[] = [
                         key: 'widgets.connection.autoReconnect',
                         type: 'boolean',
                         description:
-                            'Reconnect to the last machine you used automatically when you open gSender.',
+                            'Reconnect to the last machine you used automatically when you open Dynamic Control Panel.',
                     },
                     {
                         label: 'Firmware fallback',
                         type: 'select',
                         key: 'workspace.defaultFirmware',
                         description:
-                            'The firmware gSender will resort to using if automatic detection fails.',
+                            'The firmware Dynamic Control Panel will resort to using if automatic detection fails.',
                         options: [GRBL, GRBLHAL],
                     },
                     {
@@ -236,7 +236,7 @@ export const SettingsMenu: SettingsMenuSection[] = [
                         label: 'Send usage data',
                         key: 'workspace.sendUsageData',
                         description:
-                            'This info is sent to us as an anonymous data point, but greatly helps us improve gSender by seeing how people use it.',
+                            'This info is sent to us as an anonymous data point, but greatly helps us improve Dynamic Control Panel by seeing how people use it.',
                         type: 'boolean',
                     },
                 ],
@@ -394,7 +394,7 @@ export const SettingsMenu: SettingsMenuSection[] = [
                         type: 'wizard',
                         wizard: KeyboardLinkWizard,
                         description:
-                            'Control your CNC and navigate through gSender using custom key combinations on any keyboard, numpad, or macro pad.',
+                            'Control your CNC and navigate through Dynamic Control Panel using custom key combinations on any keyboard, numpad, or macro pad.',
                     },
                     {
                         label: 'Gamepad',
@@ -979,7 +979,7 @@ export const SettingsMenu: SettingsMenuSection[] = [
                             if (!spindleFunctions && mode === LASER_MODE) {
                                 const preferredUnits =
                                     store.get('workspace.units') ===
-                                    IMPERIAL_UNITS
+                                        IMPERIAL_UNITS
                                         ? 'G20'
                                         : 'G21';
                                 const active: boolean =
@@ -1165,9 +1165,9 @@ export const SettingsMenu: SettingsMenuSection[] = [
                                 const powerCommands = SLBLaserExists
                                     ? []
                                     : [
-                                          `$30=${prevSpindleMax}`,
-                                          `$31=${prevSpindleMin}`,
-                                      ];
+                                        `$30=${prevSpindleMax}`,
+                                        `$31=${prevSpindleMin}`,
+                                    ];
 
                                 if (active) {
                                     controller.command('gcode', 'M5');

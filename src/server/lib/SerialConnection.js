@@ -66,16 +66,21 @@ class SerialConnection extends EventEmitter {
 
     eventListener = {
         data: (data) => {
+            // Reset heartbeat on any data reception - connection is alive
+            this.resetHeartbeat();
             this.emit('data', data);
         },
         open: () => {
             this.emit('open');
         },
         close: (err) => {
+            this.stopHeartbeat();
             this.emit('close', err);
         },
         error: (err) => {
-            if (err.code === 'ECONNRESET') {
+            if (err.code === 'ECONNRESET' || err.code === 'ETIMEDOUT' || err.code === 'EPIPE') {
+                this.stopHeartbeat();
+                this.emit('connectionLost', err.message);
                 this.port.destroy();
                 this.port = null;
                 if (this.callback) {
@@ -197,19 +202,33 @@ class SerialConnection extends EventEmitter {
 
         if (network || looksLikeIP) {
             this.port = new net.Socket();
-            this.port.setTimeout(4000, () => {
+
+            // Enable TCP keepalive for connection monitoring
+            this.port.setKeepAlive(true, 5000); // 5 second initial delay
+            this.port.setTimeout(2000, () => {
                 this.port.destroy();
                 callback('Connection timeout');
             });
 
             this.port.once('connect', () => {
                 this.port.setTimeout(0);
+
+                // Start heartbeat monitoring for network connections
+                this.startHeartbeat();
+
                 callback();
             });
+
             this.port.on('error', (err) => {
                 this.port.setTimeout(0);
+                this.stopHeartbeat();
                 this.port.destroy();
                 callback(err);
+            });
+
+            // Monitor for connection loss
+            this.port.on('timeout', () => {
+                this.emit('connectionDegraded', 'Socket timeout');
             });
 
             this.addPortListeners();
@@ -223,6 +242,66 @@ class SerialConnection extends EventEmitter {
             });
             this.addPortListeners();
             this.port.open(callback);
+        }
+    }
+
+    startHeartbeat() {
+        // Only for network connections
+        if (!this.settings.network && !this.settings.path.match(/^(\d{1,3}\.){3}\d{1,3}$/)) {
+            return;
+        }
+
+        this.heartbeatInterval = setInterval(() => {
+            if (!this.port || !this.port.writable) {
+                this.stopHeartbeat();
+                this.emit('connectionLost', 'Port not writable');
+                return;
+            }
+
+            // Send status query as heartbeat
+            const now = Date.now();
+            this.lastHeartbeatSent = now;
+
+            // Track if we get a response
+            this.heartbeatTimeout = setTimeout(() => {
+                this.missedHeartbeats = (this.missedHeartbeats || 0) + 1;
+
+                if (this.missedHeartbeats === 1) {
+                    this.emit('connectionDegraded', `Missed ${this.missedHeartbeats} heartbeat`);
+                } else if (this.missedHeartbeats >= 3) {
+                    this.emit('connectionLost', `Missed ${this.missedHeartbeats} heartbeats`);
+                    this.stopHeartbeat();
+                }
+            }, 1000); // 1 second timeout for response
+
+            // Send status query
+            this.port.write('?');
+        }, 2000); // Every 2 seconds
+    }
+
+    stopHeartbeat() {
+        if (this.heartbeatInterval) {
+            clearInterval(this.heartbeatInterval);
+            this.heartbeatInterval = null;
+        }
+        if (this.heartbeatTimeout) {
+            clearTimeout(this.heartbeatTimeout);
+            this.heartbeatTimeout = null;
+        }
+        this.missedHeartbeats = 0;
+    }
+
+    resetHeartbeat() {
+        // Called when we receive data - connection is alive
+        if (this.heartbeatTimeout) {
+            clearTimeout(this.heartbeatTimeout);
+            this.heartbeatTimeout = null;
+        }
+        this.missedHeartbeats = 0;
+
+        if (this.hadConnectionIssue) {
+            this.emit('connectionRestored');
+            this.hadConnectionIssue = false;
         }
     }
 

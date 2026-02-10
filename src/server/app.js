@@ -41,10 +41,10 @@ import Backend from 'i18next-fs-backend';
 //import jwt from 'jsonwebtoken';
 import methodOverride from 'method-override';
 import morgan from 'morgan';
-import favicon from 'serve-favicon';
+// import favicon from 'serve-favicon';
 import serveStatic from 'serve-static';
 import sessionFileStore from 'session-file-store';
-import _get from 'lodash/get';
+// import _get from 'lodash/get';
 // import _noop from 'lodash/noop';
 import rimraf from 'rimraf';
 import {
@@ -174,7 +174,7 @@ const appMain = () => {
         log.error(err);
     }
 
-    app.use(favicon(path.join(_get(settings, 'assets.app.path', ''), 'favicon.ico')));
+    // app.use(favicon(path.join(_get(settings, 'assets.app.path', ''), 'favicon.ico')));
     app.use(cookieParser());
 
     // Connect's body parsing middleware. This only handles urlencoded and json bodies.

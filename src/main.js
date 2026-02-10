@@ -75,7 +75,7 @@ const main = () => {
     }
 
     app.on('second-instance', (event, commandLine, workingDirectory) => {
-    // Someone tried to run a second instance, we should focus our window.
+        // Someone tried to run a second instance, we should focus our window.
         if (!windowManager) {
             return;
         }
@@ -142,9 +142,9 @@ const main = () => {
                     dialog.showMessageBoxSync(null, {
                         title: 'Error Connecting to Remote Address',
                         message:
-              'There was an problem connecting to the remote address in gSender.',
+                            'There was an problem connecting to the remote address in gSender.',
                         detail:
-              'Remote mode has been disabled. Please verify the configured IP address before restarting the application.',
+                            'Remote mode has been disabled. Please verify the configured IP address before restarting the application.',
                     });
                     app.relaunch();
                     app.exit(-1);
@@ -162,7 +162,7 @@ const main = () => {
             if (!(address && port)) {
                 log.error(
                     'Unable to start the server at ' +
-            chalk.cyan(`http://${address}:${port}`),
+                    chalk.cyan(`http://${address}:${port}`),
                 );
                 return;
             }
@@ -181,7 +181,7 @@ const main = () => {
             };
             const options = {
                 ...bounds,
-                title: `gSender ${pkg.version}`,
+                title: `Dynamic CNC Control ${pkg.version}`,
                 kiosk,
             };
             const window = await windowManager.openWindow(url, options, splashScreen);
@@ -347,7 +347,7 @@ const main = () => {
                     minWidth: 550 / factor,
                     minHeight: 460 / factor,
                     useContentSize: true,
-                    title: 'gSender',
+                    title: 'Dynamic CNC Control',
                     parent: window,
                 };
                 // Hash router URL should look like '{url}/#/widget/:id'
@@ -369,8 +369,8 @@ const main = () => {
                 try {
                     if (event && event.sender && event.sender.browserWindowOptions) {
                         shouldReconnect =
-              !event.sender.browserWindowOptions.parent &&
-              windowManager.childWindows.length > 0;
+                            !event.sender.browserWindowOptions.parent &&
+                            windowManager.childWindows.length > 0;
                     }
                 } catch (err) {
                     log.error(err);

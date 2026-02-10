@@ -88,7 +88,7 @@ const defaultState: State = {
                 widgets: ['visualizer', 'job_status'],
             },
         },
-        machineProfile: machineProfiles[5] as MachineProfile,
+        machineProfile: machineProfiles[0] as MachineProfile,
         probeProfile: {
             xyThickness: 10,
             zThickness: {

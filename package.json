@@ -1,5 +1,5 @@
 {
-  "name": "gSender",
+  "name": "dynamic-cnc-control",
   "version": "1.5.7",
   "description": "Electron sender for GRBL based CNC machines",
   "author": {
@@ -35,7 +35,7 @@
     "build-latest": "concurrently --kill-others-on-fail --names \"build-dev-css,build-prod-server,vite:build\" \"npm run build-dev-css\" \"npm run build-prod-server\" \"npm run vite:build\" && npm run copy-css",
     "build-dev": "concurrently --kill-others-on-fail --names \"build-dev-css,build-dev-server,build-dev-app,build-dev-css\" \"npm run build-dev-server\" \"npm run build-dev-app\" \"npm run build-dev-css\"",
     "build-dev-server": "cross-env NODE_ENV=development webpack-cli --config webpack.config.server.development.js",
-    "build-dev-app": "bash -c \"mkdir -p output/app output/app-server; cp -af src/app/{favicon.ico,images,assets} output/app/\"",
+    "build-dev-app": "bash -c \"mkdir -p output/app output/app-server; cp -af src/app/{images,assets} output/app/\"",
     "build-dev-css": "postcss src/app/src/index.css -o src/app/src/application.css",
     "build-prod": "concurrently --kill-others-on-fail --names \"build-dev-css,build-prod-server,vite:build\" \"npm run build-dev-css\" \"npm run build-prod-server\" \"npm run vite:build\" && npm run copy-css",
     "build-prod-server": "cross-env NODE_ENV=production webpack-cli --config webpack.config.server.production.js",
@@ -43,7 +43,7 @@
     "copy-css": "cross-env mkdir -p dist/gsender/app/src && cp src/app/src/application.css dist/gsender/app/src/",
     "postbuild-dev-server": "bash -c \"mkdir -p output/server; cp -af src/server/{i18n,views} output/server/\"",
     "postbuild-prod-server": "bash -c \"mkdir -p dist/gsender/server; cp -af src/server/{i18n,views} dist/gsender/server/\"",
-    "postbuild-prod-app": "bash -c \"mkdir -p dist/gsender/app; cp -af src/app/{favicon.ico,i18n,images,assets} dist/gsender/app/\"",
+    "postbuild-prod-app": "bash -c \"mkdir -p dist/gsender/app; cp -af src/app/{i18n,images,assets} dist/gsender/app/\"",
     "clean": "bash -c 'rm -rf ./dist ./output'",
     "tailwind-dev": "npx tailwindcss -i src/app/src/index.css -o src/app/src/application.css --watch",
     "electron": "electron",
@@ -78,12 +78,12 @@
     "coveralls": "tap test/*.js --coverage --coverage-report=text-lcov --nyc-arg=--require --nyc-arg=@babel/register --nyc-arg=--require --nyc-arg=@babel/polyfill | coveralls",
     "cypress:open": "cypress open",
     "vite:build": "cross-env NODE_OPTIONS='--max-old-space-size=8192' yarn --cwd ./src/app build",
-    "postvite:build": "bash -c \"mkdir -p dist/gsender/app; cp -af src/app/{favicon.ico,images,assets} dist/gsender/app/\"",
+    "postvite:build": "bash -c \"mkdir -p dist/gsender/app; cp -af src/app/{images,assets} dist/gsender/app/\"",
     "install:packages": "yarn install && yarn install --prefix /src/app",
     "check-types": "tsc --noEmit -p ./src/app/src"
   },
   "build": {
-    "appId": "org.sienci.gsender",
+    "appId": "org.dynamic.cnccontrol",
     "extraMetadata": {
       "main": "./main.js"
     },
@@ -91,7 +91,7 @@
     "artifactName": "${name}-${version}-${arch}.${ext}",
     "asar": false,
     "asarUnpack": [],
-    "productName": "gSender",
+    "productName": "Dynamic CNC Control",
     "generateUpdatesFilesForAllChannels": true,
     "npmRebuild": false,
     "extraResources": [
@@ -383,6 +383,7 @@
     "worker-loader": "^3.0.8",
     "xterm": "^5.3.0",
     "xterm-addon-fit": "^0.8.0",
+    "yarn": "^1.22.22",
     "zod": "^3.23.8"
   },
   "devDependencies": {

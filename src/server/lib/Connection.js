@@ -77,7 +77,11 @@ class Connection extends EventEmitter {
                 );
             }
 
-            this.close(err);
+            // Only call internal close if it's not a background failure we're trying to recover from
+            const isIntentional = !this.userDisconnected && this.connectionHealth !== 'lost' && this.connectionHealth !== 'reconnecting';
+            if (isIntentional) {
+                this.close(err, true);
+            }
         },
         error: (err) => {
             this.emit('error', err);
@@ -90,7 +94,51 @@ class Connection extends EventEmitter {
                 }
             }
         },
+        connectionDegraded: (reason) => {
+            log.warn(`Connection degraded: ${reason}`);
+            this.connectionHealth = 'degraded';
+            this.emitToSockets('connection:health', {
+                status: 'degraded',
+                reason: reason,
+                port: this.options.port,
+            });
+        },
+        connectionLost: (reason) => {
+            log.error(`Connection lost: ${reason}`);
+            this.connectionHealth = 'lost';
+            this.emitToSockets('connection:health', {
+                status: 'lost',
+                reason: reason,
+                port: this.options.port,
+            });
+
+            // Start auto-reconnect for network connections
+            if (this.options.network || this.isNetworkConnection()) {
+                this.startAutoReconnect();
+            }
+        },
+        connectionRestored: () => {
+            log.info('Connection restored');
+            this.connectionHealth = 'connected';
+            this.reconnectAttempts = 0;
+            this.stopAutoReconnect();
+            this.emitToSockets('connection:health', {
+                status: 'connected',
+                port: this.options.port,
+            });
+        },
     };
+
+    // Connection health tracking
+    connectionHealth = 'disconnected'; // disconnected, connected, degraded, lost, reconnecting
+
+    reconnectAttempts = 0;
+
+    maxReconnectAttempts = 10;
+
+    reconnectTimer = null;
+
+    userDisconnected = false;
 
     constructor(engine, port, options, callback) {
         super();
@@ -160,9 +208,16 @@ class Connection extends EventEmitter {
             return;
         }
 
+        // Reset user disconnect flag
+        this.userDisconnected = false;
+        this.reconnectAttempts = 0;
+
         this.connection.on('data', this.connectionEventListener.data);
         this.connection.on('close', this.connectionEventListener.close);
         this.connection.on('error', this.connectionEventListener.error);
+        this.connection.on('connectionDegraded', this.connectionEventListener.connectionDegraded);
+        this.connection.on('connectionLost', this.connectionEventListener.connectionLost);
+        this.connection.on('connectionRestored', this.connectionEventListener.connectionRestored);
 
         this.connection.open((err) => {
             if (err) {
@@ -171,6 +226,13 @@ class Connection extends EventEmitter {
                 callback(err); // notify error
                 return;
             }
+
+            // Set connection health to connected
+            this.connectionHealth = 'connected';
+            this.emitToSockets('connection:health', {
+                status: 'connected',
+                port: port,
+            });
 
             // Emit a change event to all connected sockets
             if (this.engine.io) {
@@ -210,8 +272,16 @@ class Connection extends EventEmitter {
         });
     };
 
-    close(err) {
+    close(err, isUserInitiated = true) {
         const { port } = this.options;
+
+        if (isUserInitiated) {
+            // Mark as user-initiated disconnect to prevent auto-reconnect
+            this.userDisconnected = true;
+            this.stopAutoReconnect();
+        }
+
+        this.connectionHealth = 'disconnected';
 
         // Assertion check
         if (!this.connection) {
@@ -233,6 +303,13 @@ class Connection extends EventEmitter {
                 inuse: false,
             });
         }
+
+        // Notify clients of disconnect
+        this.emitToSockets('connection:health', {
+            status: 'disconnected',
+            port: port,
+            userInitiated: isUserInitiated,
+        });
 
         if (this.isClose()) {
             this.destroy();
@@ -304,6 +381,142 @@ class Connection extends EventEmitter {
             ...this.options,
             options
         };
+    }
+
+    isNetworkConnection() {
+        const { port } = this.options;
+        const ip = '(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)';
+        const expr = new RegExp(`^${ip}\\.${ip}\\.${ip}\\.${ip}$`);
+        return port && expr.test(port);
+    }
+
+    startAutoReconnect() {
+        if (this.userDisconnected) {
+            log.info('User initiated disconnect - skipping auto-reconnect');
+            return;
+        }
+
+        // Don't start another reconnect if we're already waiting to retry
+        if (this.reconnectTimer) {
+            log.debug('Auto-reconnect already in progress');
+            return;
+        }
+
+        this.reconnectAttempts++;
+        const delay = this.getReconnectDelay(this.reconnectAttempts);
+
+        log.info(`Attempting reconnect (attempt ${this.reconnectAttempts}) in ${delay}ms`);
+        this.connectionHealth = 'reconnecting';
+        this.emitToSockets('connection:health', {
+            status: 'reconnecting',
+            port: this.options.port,
+            attempt: this.reconnectAttempts,
+            nextRetryIn: delay,
+        });
+
+        this.reconnectTimer = setTimeout(() => {
+            log.info(`Reconnect attempt ${this.reconnectAttempts} starting...`);
+
+            // Clean up old connection
+            if (this.connection) {
+                try {
+                    this.connection.removeListener('data', this.connectionEventListener.data);
+                    this.connection.removeListener('close', this.connectionEventListener.close);
+                    this.connection.removeListener('error', this.connectionEventListener.error);
+                    this.connection.removeListener('connectionDegraded', this.connectionEventListener.connectionDegraded);
+                    this.connection.removeListener('connectionLost', this.connectionEventListener.connectionLost);
+                    this.connection.removeListener('connectionRestored', this.connectionEventListener.connectionRestored);
+                } catch (err) {
+                    log.warn('Error removing listeners during reconnect:', err);
+                }
+            }
+
+            // Create new connection
+            const { port, baudrate, rtscts, network } = this.options;
+            this.connection = new SerialConnection({
+                path: port,
+                baudRate: baudrate,
+                rtscts: !!rtscts,
+                network,
+                writeFilter: (data) => {
+                    const line = data.trim();
+                    if (!line) {
+                        return data;
+                    }
+                    return data;
+                },
+            });
+
+            // Attach all event listeners
+            this.connection.on('data', this.connectionEventListener.data);
+            this.connection.on('close', this.connectionEventListener.close);
+            this.connection.on('error', this.connectionEventListener.error);
+            this.connection.on('connectionDegraded', this.connectionEventListener.connectionDegraded);
+            this.connection.on('connectionLost', this.connectionEventListener.connectionLost);
+            this.connection.on('connectionRestored', this.connectionEventListener.connectionRestored);
+
+            // Attempt to open
+            this.connection.open((err) => {
+                // Clear the timer reference so next attempt can be scheduled if needed
+                this.reconnectTimer = null;
+
+                if (err) {
+                    log.error(`Reconnect attempt ${this.reconnectAttempts} failed:`, err);
+                    // Try again
+                    this.startAutoReconnect();
+                } else {
+                    log.info(`Reconnect attempt ${this.reconnectAttempts} succeeded!`);
+                    this.connectionHealth = 'connected';
+                    this.reconnectAttempts = 0;
+
+                    // Emit success
+                    this.emitToSockets('connection:health', {
+                        status: 'connected',
+                        port: this.options.port,
+                        reconnected: true,
+                    });
+
+                    // Emit serialport change
+                    if (this.engine.io) {
+                        this.engine.io.emit('serialport:change', {
+                            port: port,
+                            inuse: true,
+                        });
+                    }
+
+                    // Re-initialize controller if needed
+                    if (!this.controllerType && network) {
+                        this.controllerType = GRBLHAL;
+                        this.emit('firmwareFound', GRBLHAL, this.options, this.callback);
+                    }
+                }
+            });
+        }, delay);
+    }
+
+    stopAutoReconnect() {
+        if (this.reconnectTimer) {
+            clearTimeout(this.reconnectTimer);
+            this.reconnectTimer = null;
+        }
+    }
+
+    getReconnectDelay(attempt) {
+        // More aggressive retry for industrial use:
+        // 500ms, 1s, 2s, 5s, 5s, 10s...
+        if (attempt === 1) {
+            return 500;
+        }
+        if (attempt === 2) {
+            return 1000;
+        }
+        if (attempt === 3) {
+            return 2000;
+        }
+        if (attempt === 4) {
+            return 5000;
+        }
+        return 10000; // Max 10s delay for subsequent attempts
     }
 
     refresh() {

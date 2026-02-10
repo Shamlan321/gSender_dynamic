@@ -19,16 +19,18 @@ const DataCollection = () => {
     }, []);
 
     const handleDataCollection = () => {
-        setTimeout(async () => {
-            try {
-                const response = await api.metrics.getCollectDataStatus();
-                const currentStatus = response.data.collectUserDataStatus;
+        // Disabled: Anonymous user information dialog removed for production
+        // setTimeout(async () => {
+        //     try {
+        //         const response = await api.metrics.getCollectDataStatus();
+        //         const currentStatus = response.data.collectUserDataStatus;
 
-                setOpen(currentStatus === USER_DATA_COLLECTION.INITIAL);
-            } catch (error) {
-                console.error(error);
-            }
-        }, 3000);
+        //         setOpen(currentStatus === USER_DATA_COLLECTION.INITIAL);
+        //     } catch (error) {
+        //         console.error(error);
+        //     }
+        // }, 3000);
+        setOpen(false); // Always keep dialog closed
     };
 
     const handleAccept = async () => {

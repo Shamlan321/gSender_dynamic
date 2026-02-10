@@ -144,6 +144,8 @@ class GrblHalController {
 
     initialized = false;
 
+    connectionStabilized = false;
+
     state = {};
 
     settings = {};
@@ -318,7 +320,7 @@ class GrblHalController {
                 line = line.replace(commentMatcher, '').replace('/uFEFF', '').trim();
                 context = this.populateContext(context);
 
-                // We don't want some of these events firing if updating EEPROM in a macro - super edge case.
+                // We don't want some of z events firing if updating EEPROM in a macro - super edge case.
                 const looksLikeEEPROM = line.charAt(0) === '$';
 
                 if (line[0] === '%') {
@@ -695,6 +697,12 @@ class GrblHalController {
             if (!this.runner.hasSettings() && res.activeState === GRBL_HAL_ACTIVE_STATE_IDLE) {
                 this.initialized = true;
                 this.initController();
+
+                // Initialize stabilization timer
+                setTimeout(() => {
+                    this.connectionStabilized = true;
+                    log.debug('Connection stabilized (status) - enabling manual cycle start');
+                }, 2000);
             }
 
             // Make sure we also have axs parsed - at most two times or we get endless loop
@@ -970,6 +978,30 @@ class GrblHalController {
 
         this.runner.on('feedback', (res) => {
             this.emit('serialport:read', res.raw);
+
+            // Manual Cycle Start Trigger
+            if (res.message) {
+                // Log for debugging
+                // log.info(`Feedback Message: "${res.message}"`);
+
+                if (res.message.includes('Button Pressed')) {
+                    if (!this.connectionStabilized) {
+                        log.warn(`Manual Cycle Start ignored: Connection not yet stabilized. Message: "${res.message}"`);
+                        return;
+                    }
+
+                    log.info(`Manual Cycle Start triggered via controller button: "${res.message}"`);
+                    if (this.workflow.state === WORKFLOW_STATE_IDLE) {
+                        if (this.runner.isAlarm()) {
+                            log.warn('Manual Cycle Start ignored: Controller is in ALARM state');
+                            return;
+                        }
+                        this.command('gcode:start');
+                    } else {
+                        log.warn(`Manual Cycle Start ignored: Workflow is not IDLE (State: ${this.workflow.state})`);
+                    }
+                }
+            }
         });
 
         this.runner.on('settings', (res) => {
@@ -999,6 +1031,25 @@ class GrblHalController {
         this.runner.on('info', (res) => {
             this.emit('serialport:read', res.raw);
             this.emit('grblHal:info', res);
+
+            // Manual Cycle Start Trigger (check info messages too)
+            if (res.raw && res.raw.includes('MSG, Button Pressed')) {
+                if (!this.connectionStabilized) {
+                    log.warn(`Manual Cycle Start ignored (Info): Connection not yet stabilized. Message: "${res.raw}"`);
+                    return;
+                }
+
+                log.info(`Manual Cycle Start triggered via controller button (Info event): "${res.raw}"`);
+                if (this.workflow.state === WORKFLOW_STATE_IDLE) {
+                    if (this.runner.isAlarm()) {
+                        log.warn('Manual Cycle Start ignored: Controller is in ALARM state');
+                        return;
+                    }
+                    this.command('gcode:start');
+                } else {
+                    log.warn(`Manual Cycle Start ignored: Workflow is not IDLE (State: ${this.workflow.state})`);
+                }
+            }
         });
 
         this.runner.on('startup', async (res) => {
@@ -1432,6 +1483,12 @@ class GrblHalController {
 
                             // Initialize controller
                             this.initController();
+
+                            // Initialize stabilization timer
+                            setTimeout(() => {
+                                this.connectionStabilized = true;
+                                log.debug('Connection stabilized - enabling manual cycle start');
+                            }, 2000);
                         }
 
                         this.connection.writeImmediate('$ES\n$ESH\n$EG\n$EA\n$spindles\n');
@@ -1446,12 +1503,20 @@ class GrblHalController {
             } else {
                 this.initialized = true;
                 this.initController();
+
+                // Initialize stabilization timer
+                setTimeout(() => {
+                    this.connectionStabilized = true;
+                    log.debug('Connection stabilized - enabling manual cycle start');
+                }, 2000);
             }
         }, 500);
     }
 
     close(callback, received) {
         const { port } = this.options;
+
+        this.connectionStabilized = false;
 
         // Assertion check
         if (!this.connection) {

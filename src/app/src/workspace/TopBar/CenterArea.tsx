@@ -1,18 +1,20 @@
 import MachineInfo from 'app/features/MachineInfo';
 import MachineStatus from 'app/features/MachineStatus/MachineStatus';
+import ConnectionStatus from 'app/features/Connection/ConnectionStatus';
 
 import NotificationsArea from '../../features/NotificationsArea';
 
 const CenterArea = () => {
     return (
-        <div className="absolute top-0 left-0 flex gap-4 items-center w-full h-14 max-xl:h-12 max-sm:pointer-events-none">
-            <div className="absolute flex gap-4 items-center top-5 max-xl:top-3 left-1/2 right-1/2 -ml-56 w-max">
-                <NotificationsArea />
+        <div className="flex items-center gap-4 h-full pointer-events-auto">
+            <ConnectionStatus />
 
+            <div className="flex items-center gap-4 overflow-visible">
+                <NotificationsArea />
                 <MachineInfo />
             </div>
 
-            <div className="absolute top-0 left-1/2 right-1/2">
+            <div className="min-w-[100px]">
                 <MachineStatus />
             </div>
         </div>
