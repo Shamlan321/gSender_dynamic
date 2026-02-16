@@ -43,7 +43,7 @@ export function IconUpdater() {
     }, []);
 
     return (
-        <div className="w-[300px] h-[80px] max-sm:hidden relative z-[10000] mt-6">
+        <div className="w-[300px] h-[80px] max-sm:hidden relative z-[10000] mt-3">
             <img alt="Dynamic Logo" src={dynamicLogo} className="h-full w-auto object-contain" />
             <UpdateBadge hidden={showUpdater} />
         </div>

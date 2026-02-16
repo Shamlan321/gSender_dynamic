@@ -25,12 +25,12 @@ import { NotificationDisplay } from './features/NotificationsArea/NotificationDi
 import { WorkspaceSelector } from './features/WorkspaceSelector';
 import DRO from './features/DRO';
 import { RemoteWidget } from './components/RemoteWidget';
-import Coolant from './features/Coolant';
+import Oiling from './features/Coolant';
 import FileControl from './features/FileControl';
 import JobControl from './features/JobControl';
 import { Jogging } from './features/Jogging';
 import Macros from './features/Macros';
-import Probe from './features/Probe';
+import Tool from './features/Tool';
 import Rotary from './features/Rotary';
 import Spindle from './features/Spindle';
 import { BottomNav } from './features/RemoteMode/components/BottomNav';
@@ -251,8 +251,8 @@ export const ReactRoutes = () => {
                     path="tools"
                     element={
                         <>
-                            <RemoteWidget label="Probe">
-                                <Probe />
+                            <RemoteWidget label="Tool">
+                                <Tool />
                             </RemoteWidget>
                             <RemoteWidget label="Macros">
                                 <Macros />
@@ -260,8 +260,8 @@ export const ReactRoutes = () => {
                             <RemoteWidget label="Spindle">
                                 <Spindle />
                             </RemoteWidget>
-                            <RemoteWidget label="Coolant">
-                                <Coolant />
+                            <RemoteWidget label="Oiling">
+                                <Oiling />
                             </RemoteWidget>
                             <RemoteWidget label="Rotary">
                                 <Rotary />

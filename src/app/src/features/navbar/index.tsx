@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { FaTasks } from 'react-icons/fa';
 import { RiToolsFill } from 'react-icons/ri';
 import { IoSpeedometerOutline } from 'react-icons/io5';
@@ -10,12 +11,16 @@ import { useSettings } from '../Config/utils/SettingsContext.tsx';
 import Blocker from './components/Blocker.tsx';
 import { Confirm } from 'app/components/ConfirmationDialog/ConfirmationDialogLib.ts';
 import pubsub from 'pubsub-js';
+import { AdminLock } from './components/AdminLock';
 
 export const NavBar = () => {
     const { settingsAreDirty, setSettingsAreDirty } = useSettings();
     const location = useLocation();
     const navigate = useNavigate();
     const blocker = new Blocker();
+
+    const [adminLockOpen, setAdminLockOpen] = useState(false);
+    const [pendingHref, setPendingHref] = useState('');
 
     const proceed = () => {
         blocker.proceed();
@@ -25,11 +30,27 @@ export const NavBar = () => {
         blocker.reset();
     };
 
+    const handleAdminUnlock = () => {
+        if (pendingHref) {
+            navigate(pendingHref);
+            setPendingHref('');
+        }
+    };
+
     const checkIfNeedsBlock = (
         e: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
         href: string,
     ) => {
         e.preventDefault();
+
+        // Check if trying to access configuration
+        if (href.includes('configuration')) {
+            if (location.pathname.includes('configuration')) return;
+            setPendingHref(href);
+            setAdminLockOpen(true);
+            return;
+        }
+
         if (location.pathname.includes('configuration') && settingsAreDirty) {
             blocker.block(() => {
                 pubsub.publish('repopulate');
@@ -51,6 +72,11 @@ export const NavBar = () => {
     };
     return (
         <>
+            <AdminLock
+                open={adminLockOpen}
+                onOpenChange={setAdminLockOpen}
+                onSuccess={handleAdminUnlock}
+            />
             <div
                 className={cx(
                     'grid [grid-template-rows:minmax(0,30%)_auto_auto] gap-0 justify-end flex-grow self-stretch',
@@ -80,6 +106,7 @@ export const NavBar = () => {
                     href="configuration"
                     icon={FaTasks}
                     label="Config"
+                    onClick={(e) => checkIfNeedsBlock(e, 'configuration')}
                 />
             </div>
         </>

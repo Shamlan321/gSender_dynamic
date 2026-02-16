@@ -111,6 +111,36 @@ const main = () => {
     logPath = path.join(app.getPath('userData'), 'logs/grbl.log');
     grblLog.transports.file.resolvePath = () => logPath;
 
+    // Admin Lock Handlers
+    const adminLockFile = path.join(userData, 'admin_lock.dat');
+
+    ipcMain.handle('admin:check-password-exists', async () => {
+        return fs.existsSync(adminLockFile);
+    });
+
+    ipcMain.handle('admin:verify-password', async (event, password) => {
+        if (!fs.existsSync(adminLockFile)) return false;
+        try {
+            const storedHash = fs.readFileSync(adminLockFile, 'utf8');
+            const inputHash = Buffer.from(password).toString('base64');
+            return storedHash === inputHash;
+        } catch (err) {
+            console.error('Error verifying password:', err);
+            return false;
+        }
+    });
+
+    ipcMain.handle('admin:set-password', async (event, password) => {
+        try {
+            const hash = Buffer.from(password).toString('base64');
+            fs.writeFileSync(adminLockFile, hash, 'utf8');
+            return true;
+        } catch (err) {
+            console.error('Error setting password:', err);
+            return false;
+        }
+    });
+
     app.whenReady().then(async () => {
         try {
             await session.defaultSession.clearCache();

@@ -54,7 +54,7 @@ export function RapidPositionButtons({ disabled = false }) {
                     >
                         <path
                             d="M 32 0 H 0 V 32"
-                            stroke-width="20"
+                            strokeWidth="20"
                             className={cn(
                                 disabled ? disabledColorClass : altColourClass,
                             )}
@@ -76,7 +76,7 @@ export function RapidPositionButtons({ disabled = false }) {
                         <path
                             // d="M 74 32 V 0 L 42 0"
                             d="M 32 32 V 0 L 0 0"
-                            stroke-width="20"
+                            strokeWidth="20"
                             className={cn(
                                 disabled ? disabledColorClass : altColourClass,
                             )}
@@ -98,7 +98,7 @@ export function RapidPositionButtons({ disabled = false }) {
                         <path
                             // d="M 0 36 L 0 67 L 32 67"
                             d="M 0 0 L 0 32 L 32 32"
-                            stroke-width="20"
+                            strokeWidth="20"
                             className={cn(
                                 disabled ? disabledColorClass : altColourClass,
                             )}
@@ -120,7 +120,7 @@ export function RapidPositionButtons({ disabled = false }) {
                         <path
                             // d="M 42 67 H 74 V 36"
                             d="M 0 32 H 32 V 0"
-                            stroke-width="20"
+                            strokeWidth="20"
                             className={cn(
                                 disabled ? disabledColorClass : altColourClass,
                             )}
